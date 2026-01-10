@@ -1,33 +1,35 @@
+import requests
+import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # ✅ Add this
 
 app = Flask(__name__)
-CORS(app)  # ✅ Enable CORS for all routes
 
-@app.route("/")
-def home():
-    return {
-        "status": "running",
-        "message": "SDG 13 Climate Action Backend Live 🌍"
+GEMINI_API_KEY = "AIzaSyDSradiZ1k3a3Q1cfaQIAt190ppm57nzfo"
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_message = request.json.get("message")
+
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={AIzaSyDSradiZ1k3a3Q1cfaQIAt190ppm57nzfo}"
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": user_message}
+                ]
+            }
+        ]
     }
 
-@app.route("/carbon", methods=["POST"])
-def carbon():
-    data = request.json
-    score = sum(data.values())
+    response = requests.post(url, json=payload)
+    data = response.json()
 
-    if score <= 4:
-        level = "Low"
-    elif score <= 8:
-        level = "Moderate"
-    else:
-        level = "High"
+    reply = (
+        data.get("candidates", [{}])[0]
+        .get("content", {})
+        .get("parts", [{}])[0]
+        .get("text", "No response")
+    )
 
-    return jsonify({
-        "carbon_score": score,
-        "impact_level": level
-    })
-
-if __name__ == "__main__":
-    app.run()
-
+    return jsonify({"reply": reply})
