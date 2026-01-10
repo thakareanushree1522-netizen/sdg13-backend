@@ -1,9 +1,9 @@
 import requests
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # ✅ Add this
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allow requests from frontend
+CORS(app)
 
 GEMINI_API_KEY = "AIzaSyDSradiZ1k3a3Q1cfaQIAt190ppm57nzfo"
 
@@ -15,19 +15,15 @@ def chat():
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
     payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": user_message}
-                ]
-            }
-        ]
+        "contents": [{"parts": [{"text": user_message}]}]
     }
 
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
         result = response.json()
+
+        print("Gemini API result:", result)  # ✅ debug log
 
         reply = (
             result.get("candidates", [{}])[0]
@@ -35,13 +31,13 @@ def chat():
             .get("parts", [{}])[0]
             .get("text", "Sorry, I could not generate a response.")
         )
-
-    except Exception as e:
-        print("Error:", e)
+    except requests.exceptions.RequestException as e:
+        print("Error connecting to Gemini:", e)
         reply = "❌ Unable to connect to Gemini AI."
 
     return jsonify({"reply": reply})
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
