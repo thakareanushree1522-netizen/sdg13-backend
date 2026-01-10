@@ -8,6 +8,9 @@ CORS(app)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY not set in environment variables")
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -36,7 +39,12 @@ def chat():
         response.raise_for_status()
         result = response.json()
 
-        reply = result["candidates"][0]["content"]["parts"][0]["text"]
+        reply = (
+            result.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "No response from Gemini.")
+        )
 
     except Exception as e:
         print("Gemini error:", e)
@@ -46,4 +54,5 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
