@@ -5,7 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-GEMINI_API_KEY = "AIzaSyDSradiZ1k3a3Q1cfaQIAt190ppm57nzfo"
+GEMINI_API_KEY = "AIzaSyAseIFaCJ2nvVs3RP5D4nUPDL8X2cskmmg"
 
 @app.route("/chat", methods=["POST"])
 def chat():
