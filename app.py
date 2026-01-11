@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  #  Add this
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app)  #  Enable CORS for all routes
 
 @app.route("/")
@@ -28,7 +28,7 @@ def carbon():
         "impact_level": level
     })
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run()
 
 
