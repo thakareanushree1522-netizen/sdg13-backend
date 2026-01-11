@@ -1,58 +1,34 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
-import os
+from flask_cors import CORS  #  Add this
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(_name_)
+CORS(app)  #  Enable CORS for all routes
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY not set in environment variables")
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
-
-    if not user_message:
-        return jsonify({"reply": "Please type a message."})
-
-    url = (
-        "https://generativelanguage.googleapis.com/"
-        "v1beta/models/gemini-1.5-flash:generateContent"
-        f"?key={GEMINI_API_KEY}"
-    )
-
-    payload = {
-        "contents": [
-            {
-                "role": "user",
-                "parts": [{"text": user_message}]
-            }
-        ]
+@app.route("/")
+def home():
+    return {
+        "status": "running",
+        "message": "SDG 13 Climate Action Backend Live "
     }
 
-    try:
-        response = requests.post(url, json=payload, timeout=15)
-        response.raise_for_status()
-        result = response.json()
+@app.route("/carbon", methods=["POST"])
+def carbon():
+    data = request.json
+    score = sum(data.values())
 
-        reply = (
-            result.get("candidates", [{}])[0]
-            .get("content", {})
-            .get("parts", [{}])[0]
-            .get("text", "No response from Gemini.")
-        )
+    if score <= 4:
+        level = "Low"
+    elif score <= 8:
+        level = "Moderate"
+    else:
+        level = "High"
 
-    except Exception as e:
-        print("Gemini error:", e)
-        reply = "❌ Gemini AI is not responding."
+    return jsonify({
+        "carbon_score": score,
+        "impact_level": level
+    })
 
-    return jsonify({"reply": reply})
-
-if __name__ == "__main__":
-    app.run(debug=True)
+if _name_ == "_main_":
+    app.run()
 
 
